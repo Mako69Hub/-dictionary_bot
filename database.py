@@ -56,9 +56,9 @@ def check_repeat_word(user_id, word):
         with sqlite3.connect('db.sqlite') as con:
             cur = con.cursor()
 
-            cur.execute('''SELECT EXISTS(SELECT word 
+            cur.execute(f'''SELECT EXISTS(SELECT word 
             FROM dict 
-            WHERE user_id=? AND word=?)''', (user_id, word))
+            WHERE user_id={user_id} AND word='{word}')''')
 
             exists = cur.fetchone()[0]
             if exists:
@@ -70,4 +70,27 @@ def check_repeat_word(user_id, word):
 
 
 def select_word(user_id):
-    pass
+    user_dict = []
+    try:
+        with sqlite3.connect('db.sqlite') as con:
+            cur = con.cursor()
+
+            cur.execute(f'''SELECT word, trans 
+            FROM dict 
+            WHERE user_id={user_id}''')
+
+            result = cur.fetchall()
+            if not result:
+                return 'Словарь пуст'
+
+            count = 1
+            for element in result:
+                user_dict.append(f'{count}. {element[0]} - {element[1]}')
+                count += 1
+
+            dict_str = '\n\n'.join(user_dict) # Можно перенести в бота
+
+            return dict_str
+    except Exception as e:
+        logging.error(e)
+        return 'Возникла ошибки при обращении к словарю'

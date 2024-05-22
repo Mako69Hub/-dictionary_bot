@@ -1,11 +1,11 @@
 from telebot import TeleBot
 from telebot.types import Message
-from database import new_word, check_repeat_word
+from database import new_word, check_repeat_word, select_word
 
 
 def start_handler(message: Message, bot: TeleBot):
     bot.send_message(message.chat.id, 'start_text')
-    answer = new_word(message.chat.id, ['cat', 'кошка', message.date])
+    answer = new_word(message.chat.id, ['dog', 'собака', message.date])
     bot.send_message(message.from_user.id, answer)
 
 
@@ -14,7 +14,11 @@ def help_handler(message: Message, bot: TeleBot):
     status, men = check_repeat_word(message.chat.id, 'cat')
     bot.send_message(message.chat.id, men)
 
+def lol_handler(message: Message, bot: TeleBot):
+    answer = select_word(message.chat.id)
+    bot.send_message(message.chat.id, answer)
 
 def register_handlers(bot: TeleBot):
     bot.register_message_handler(start_handler, commands=['start'], pass_bot=True)
     bot.register_message_handler(help_handler, commands=['help'], pass_bot=True)
+    bot.register_message_handler(lol_handler, commands=['lol'], pass_bot=True)
