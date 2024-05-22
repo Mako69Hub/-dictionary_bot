@@ -43,7 +43,13 @@ def new_word(user_id, full_message):
             con.commit()
             logging.info('DATABASE: INSERT INTO dict'
                          f'VALUES ({user_id}, {word}, {trans}, {date})')
+            print('ты лох')
+            return True, 'Слово успешно добавлено'
 
     except Exception as e:
         logging.error(e)
-        return None
+        return None, 'Что-то пошло не так'
+
+
+def select_word(user_id):
+    pass
