@@ -1,7 +1,7 @@
 import sqlite3
 import logging
 
-logging.basicConfig(filename='logs.txt', level=logging.INFO,
+logging.basicConfig(filename='logs.log', level=logging.INFO,
                     format="%(asctime)s FILE: %(filename)s IN: %(funcName)s MESSAGE: %(message)s", filemode="w")
 
 
