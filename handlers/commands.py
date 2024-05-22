@@ -1,6 +1,6 @@
 from telebot import TeleBot
 from telebot.types import Message
-from database import new_word
+from database import new_word, check_repeat_word
 
 
 def start_handler(message: Message, bot: TeleBot):
@@ -11,7 +11,8 @@ def start_handler(message: Message, bot: TeleBot):
 
 
 def help_handler(message: Message, bot: TeleBot):
-    pass
+    status, men = check_repeat_word(message.chat.id, 'cat')
+    bot.send_message(message.chat.id, men)
 
 
 def register_handlers(bot: TeleBot):

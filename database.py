@@ -48,11 +48,26 @@ def new_word(user_id, full_message):
 
     except Exception as e:
         logging.error(e)
-        return 'Что-то пошло не так'
+        return 'Ошибка во время добавления слова в БД'
 
 
-def select_word(user_id):
-    pass
+def check_repeat_word(user_id, word):
+    try:
+        with sqlite3.connect('db.sqlite') as con:
+            cur = con.cursor()
+
+            cur.execute('''SELECT EXISTS(SELECT word 
+            FROM dict 
+            WHERE user_id=? AND word=?)''', (user_id, word))
+
+            exists = cur.fetchone()[0]
+            if exists:
+                return False, 'Такое слово уже есть в словаре'
+            return True, 'Такого слова нет в словаре'
+    except Exception as e:
+        logging.error(e)
+        return False, 'Ошибка при проверке слова'
+
 
 def select_word(user_id):
     pass
