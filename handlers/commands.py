@@ -5,8 +5,8 @@ from database import new_word
 
 def start_handler(message: Message, bot: TeleBot):
     bot.send_message(message.chat.id, 'start_text')
-    # status, answer = new_word(message.chat.id, ['cat', 'кошка', message.date])
-    bot.send_message(message.from_user.id, 'Ты мафия')
+    answer = new_word(message.chat.id, ['cat', 'кошка', message.date])
+    bot.send_message(message.from_user.id, answer)
 
 
 
