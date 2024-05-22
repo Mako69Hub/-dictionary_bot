@@ -2,3 +2,7 @@ venv/
 .env
 *.log
 *.db
+*.sqlite
+
+
+
