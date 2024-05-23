@@ -89,3 +89,15 @@ def select_word(user_id):
         return 'Возникла ошибки при обращении к словарю'
 
 
+
+
+def update_word(user_id, word, translation):
+    try:
+        with sqlite3.connect('db.sqlite') as conn:
+            cursor = conn.cursor()
+            cursor.execute("UPDATE dict SET trans = ? WHERE user_id = ? AND word = ?", (translation, user_id, word))
+            logging.info(f"DATABASE: UPDATE words SET translation = {translation} WHERE user_id = {user_id} AND word = {word}")
+            conn.commit()
+    except Exception as e:
+        logging.error(e)
+        return None
