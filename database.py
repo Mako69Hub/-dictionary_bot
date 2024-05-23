@@ -26,7 +26,7 @@ def create_database():
         return None
 
 
-def new_word(user_id, full_message):
+def insert_new_word(user_id, full_message):
     try:
         with sqlite3.connect('db.sqlite') as con:
             cur = con.cursor()
@@ -44,7 +44,7 @@ def new_word(user_id, full_message):
             logging.info('DATABASE: INSERT INTO dict'
                          f'VALUES ({user_id}, {word}, {trans}, {date})')
 
-            return 'Слово успешно добавлено'
+            return ''
 
     except Exception as e:
         logging.error(e)
@@ -62,15 +62,15 @@ def check_repeat_word(user_id, word):
 
             exists = cur.fetchone()[0]
             if exists:
-                return False, 'Такое слово уже есть в словаре'
-            return True, 'Такого слова нет в словаре'
+                return False, f'Слово {word} уже есть в словаре\n'
+            return True, ''
+
     except Exception as e:
         logging.error(e)
         return False, 'Ошибка при проверке слова'
 
 
 def select_word(user_id):
-    user_dict = []
     try:
         with sqlite3.connect('db.sqlite') as con:
             cur = con.cursor()
@@ -82,15 +82,8 @@ def select_word(user_id):
             result = cur.fetchall()
             if not result:
                 return 'Словарь пуст'
+            return result
 
-            count = 1
-            for element in result:
-                user_dict.append(f'{count}. {element[0]} - {element[1]}')
-                count += 1
-
-            dict_str = '\n\n'.join(user_dict) # Можно перенести в бота
-
-            return dict_str
     except Exception as e:
         logging.error(e)
         return 'Возникла ошибки при обращении к словарю'
