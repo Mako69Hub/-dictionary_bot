@@ -94,3 +94,5 @@ def select_word(user_id):
     except Exception as e:
         logging.error(e)
         return 'Возникла ошибки при обращении к словарю'
+
+

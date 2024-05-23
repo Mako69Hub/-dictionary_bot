@@ -2,9 +2,12 @@ from telebot import TeleBot
 from telebot.types import Message
 from database import new_word, check_repeat_word, select_word
 from scheduler import create_job, scheduler
-
+import datetime
 
 def start_handler(message: Message, bot: TeleBot):
+    # print(message.json)
+    x = datetime.date.fromtimestamp(message.json['date'])
+    print(x)
     bot.send_message(message.chat.id, 'start_text')
     answer = new_word(message.chat.id, ['dog', 'собака', message.date])
     bot.send_message(message.from_user.id, answer)
