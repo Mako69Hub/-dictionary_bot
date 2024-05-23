@@ -4,6 +4,7 @@ venv/
 *.db
 *.sqlite
 main.py
+main1.py
 
 
 
