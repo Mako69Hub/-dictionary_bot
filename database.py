@@ -46,7 +46,7 @@ def insert_new_word(user_id, full_message):
 
             return ''
 
-    except Exception as e:
+    except sqlite3.IntegrityError as e:
         logging.error(e)
         return 'Ошибка во время добавления слова в БД'
 
@@ -83,12 +83,9 @@ def select_word(user_id):
             if not result:
                 return 'Словарь пуст'
             return result
-
     except Exception as e:
         logging.error(e)
         return 'Возникла ошибки при обращении к словарю'
-
-
 
 
 def update_word(user_id, word, translation):
@@ -101,3 +98,7 @@ def update_word(user_id, word, translation):
     except Exception as e:
         logging.error(e)
         return None
+
+
+def bd_update_lvl():
+    pass

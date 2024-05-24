@@ -1,15 +1,19 @@
-from database import check_repeat_word, insert_new_word
+from database import check_repeat_word, select_word
 
 
 def str_in_list_dict(text):
     dict = text.split('\n')
     list_words = []
+    report_int = ''
 
     for element in dict:
         word, translation = map(str.strip, element.split('='))
-        list_words.append([word, translation])
+        if word.isalnum():
+            list_words.append([word, translation])
+        else:
+            report_int += f'Слово {word}={translation} должно состоять из букв.\n'
 
-    return list_words
+    return list_words, report_int
 
 
 def list_in_str_dict(text):
@@ -19,6 +23,7 @@ def list_in_str_dict(text):
         str_words += f'{count}. {element[0]} - {element[1]}\n'
         count += 1
     return str_words
+
 
 def remove_double_word(user_id, dict_user):
     report_check = ''
@@ -35,4 +40,5 @@ def remove_double_word(user_id, dict_user):
 
 # def passivation_dict(user_id, date, dict_user):
 #     for element in dict_user:
-#
+def random_words_dect(user_id, quantity = 10):
+        pass

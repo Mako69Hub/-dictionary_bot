@@ -6,6 +6,7 @@ scheduler = BackgroundScheduler()
 
 def send_remind(user_id, bot):
     bot.send_message(user_id, 'Время повторить')
+    
 
 
 def create_job(bot, user_id, time_to_repeat_in_hours=3):
