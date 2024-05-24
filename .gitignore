@@ -2,4 +2,9 @@ venv/
 .env
 *.log
 *.db
+*.sqlite
+main.py
 main1.py
+
+
+
