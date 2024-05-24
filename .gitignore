@@ -2,3 +2,4 @@ venv/
 .env
 *.log
 *.db
+main1.py
