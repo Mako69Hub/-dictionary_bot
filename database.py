@@ -17,7 +17,7 @@ def create_database():
                 word TEXT,
                 trans TEXT,
                 date INTEGER,
-                level INTEGER DEFAULT '0',
+                level_us INTEGER DEFAULT '0',
                 error INTEGER DEFAULT '0')
             ''')
             logging.info('DATABASE: База данных создана')
@@ -70,14 +70,14 @@ def check_repeat_word(user_id, word):
         return False, 'Ошибка при проверке слова'
 
 
-def select_word(user_id):
+def select_word(user_id): #делать выборку выученных слов
     try:
         with sqlite3.connect('db.sqlite') as con:
             cur = con.cursor()
 
-            cur.execute(f'''SELECT word, trans 
+            cur.execute(f'''SELECT word, trans, level_us, date 
             FROM dict 
-            WHERE user_id={user_id}''')
+            WHERE user_id={user_id} AND level_us < 10''')
 
             result = cur.fetchall()
             if not result:
@@ -85,7 +85,7 @@ def select_word(user_id):
             return result
     except Exception as e:
         logging.error(e)
-        return 'Возникла ошибки при обращении к словарю'
+        return 'Возникла ошибка при обращении к словарю'
 
 
 def update_word(user_id, word, translation):

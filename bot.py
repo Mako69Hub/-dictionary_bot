@@ -3,7 +3,7 @@ from telebot.types import Message
 from telebot import types
 
 from database import create_database, insert_new_word, update_word, select_word, bd_update_lvl
-from process import str_in_list_dict, remove_double_word, list_in_str_dict
+from process import str_in_list_dict, remove_double_word, list_in_str_dict, interval_repeat
 from config import TOKEN, CUR_USER_DICT, STEP_USER
 from time import sleep
 from random import sample
@@ -60,7 +60,7 @@ def new_word_handler(message: Message):
 
 
 def double_check(message, dict_user):
-    if message.text.lower() == 'Да':
+    if message.text == 'Да':
         date_dict = datetime.date.fromtimestamp(message.json['date'])
 
         report = ''
@@ -88,7 +88,7 @@ def handle_update_command(message):
             word, translation = map(str.strip, text.split('=', 1))
 
             if not word.isalnum():
-                bot.send_message(message.chat.id, 'Слово не должно содержать букв, а вот регистр не имеет значения')
+                bot.send_message(message.chat.id, 'Слово не должно содержать букв')
                 bot.register_next_step_handler(message, get_update_word)
                 return
 
@@ -103,6 +103,11 @@ def handle_update_command(message):
 @bot.message_handler(commands=['list'])
 def list_handler(message: Message):
     dict_user_all = select_word(message.chat.id)
+
+    if type(dict_user_all) == type('str'):
+        bot.send_message(message.chat.id, dict_user_all)
+        return
+
     list_user = list_in_str_dict(dict_user_all)
     bot.send_message(message.chat.id, list_user)
 
@@ -110,8 +115,10 @@ def list_handler(message: Message):
 @bot.message_handler(commands=['play'])
 def play_handler(message: Message):
     dict_user = select_word(message.chat.id)
+    # cur_dict_user = interval_repeat(dict_user)
 
-    if type(dict_user) == 'str':
+
+    if type(dict_user) == type('str'):
         bot.send_message(message.chat.id, dict_user)
         return
 

@@ -1,5 +1,6 @@
 from database import check_repeat_word, select_word
-
+from datetime import datetime, timedelta
+from config import LEVEL_TIME
 
 def str_in_list_dict(text):
     dict = text.split('\n')
@@ -40,5 +41,8 @@ def remove_double_word(user_id, dict_user):
 
 # def passivation_dict(user_id, date, dict_user):
 #     for element in dict_user:
-def random_words_dect(user_id, quantity = 10):
-        pass
+def interval_repeat(dict):
+    date_word, level_word = dict[2], dict[2]
+    # date_level =
+
+    pass
