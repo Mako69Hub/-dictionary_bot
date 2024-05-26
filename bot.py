@@ -1,5 +1,6 @@
 from telebot import TeleBot
 from telebot.types import Message
+from telebot import types
 
 from database import create_database, insert_new_word, update_word, select_word, bd_update_lvl
 from process import str_in_list_dict, remove_double_word, list_in_str_dict
@@ -13,6 +14,11 @@ import datetime
 
 bot = TeleBot(TOKEN)
 
+
+def key(buttons_text):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2, one_time_keyboard=True)
+    markup.add(*buttons_text)
+    return markup
 
 @bot.message_handler(commands=['start'])
 def start_handler(message: Message):
@@ -48,13 +54,13 @@ def new_word_handler(message: Message):
         sleep(1)
         str_dict1 = list_in_str_dict(list_dict)
         bot.send_message(message.chat.id, str_dict1)
-
-    bot.send_message(message.chat.id, 'Если всё верно, то нажмите /da')
+    markup = key(['Да', 'Нет'])
+    bot.send_message(message.chat.id, 'Если всё верно, то нажмите Да', reply_markup=markup)
     bot.register_next_step_handler(message, double_check, list_dict)
 
 
 def double_check(message, dict_user):
-    if message.text.lower() == '/da':
+    if message.text.lower() == 'Да':
         date_dict = datetime.date.fromtimestamp(message.json['date'])
 
         report = ''
@@ -66,7 +72,9 @@ def double_check(message, dict_user):
         else:
             report = 'Ошибка во время добавления в БД'
         bot.send_message(message.chat.id, report)
-    return
+    else:
+        bot.send_message(message.chat.id, 'Введите слова ещё раз')
+        bot.register_next_step_handler(message, new_word_handler)
 
 
 @bot.message_handler(commands=['update'])
