@@ -60,7 +60,7 @@ def new_word_handler(message: Message):
 
 
 def double_check(message, dict_user):
-    if message.text.lower() == 'Да':
+    if message.text == 'Да':
         date_dict = datetime.date.fromtimestamp(message.json['date'])
 
         report = ''
