@@ -2,13 +2,13 @@ from telebot import TeleBot
 from telebot.types import Message
 from telebot import types
 
-from database import create_database, insert_new_word, update_word, select_word, bd_update_lvl
+from database import create_database, insert_new_word, update_word, select_word, update_level
 from process import str_in_list_dict, remove_double_word, list_in_str_dict
 from config import TOKEN, CUR_USER_DICT, STEP_USER
 from time import sleep
 from random import sample
 import datetime
-from scheduler import scheduler, check_interval_word
+from scheduler import scheduler, check_interval_word, cur_date_now
 # from handlers import commands, speechkit
 
 bot = TeleBot(TOKEN)
@@ -163,13 +163,12 @@ def repeat(message: Message):
         bot.send_message(message.chat.id, 'Молодец, повторил все слова')
         return
 
-    cur_word, cur_trans = list_words[0][0], list_words[0][1]
-
-    bot.send_message(message.chat.id, f'Напишите перевод слова {cur_trans}')
-    bot.register_next_step_handler(message, replay, cur_word)
+    bot.send_message(message.chat.id, f'Напишите перевод слова {list_words[0][1]}')
+    bot.register_next_step_handler(message, replay, list_words[0])
 
 
-def replay(message: Message, word_user):
+def replay(message: Message, list_word):
+    word, trans, level_word, date_word = list_word
     answer_us = message.text
     if answer_us == '/exit':
         bot.send_message(message.chat.id, 'Жду нашей встречи вновь.')
@@ -177,16 +176,20 @@ def replay(message: Message, word_user):
 
     if not answer_us.isalnum():
         bot.send_message(message.chat.id, 'Введите ответ без цифр')
-        bot.register_next_step_handler(message, replay, word_user)
+        bot.register_next_step_handler(message, list_word)
         return
 
-    if answer_us.lower() == word_user:
+    if answer_us == word:
         bot.send_message(message.chat.id,
-                         'Верно')  # Увеличить уровень, дописать. Ещё нужно спрашивать чела, праввильно или нет
-        bd_update_lvl()
+                         'Верно.\nЗагружаю следующее слово...')
+        level_word += 1 # Ещё нужно спрашивать чела, правильно или нет
+
+        date_now = cur_date_now()
+
+        update_level(message.chat.id, word, level_word, date_now)
 
     else:
-        bot.send_message(message.chat.id, f'Правильное написание: {word_user} ')
+        bot.send_message(message.chat.id, f'Правильное написание: {word} ')
 
     list_words = CUR_USER_DICT[message.chat.id]
 

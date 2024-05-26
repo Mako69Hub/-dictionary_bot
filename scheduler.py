@@ -22,12 +22,17 @@ def create_job(bot, user_id, time_to_repeat_in_hours=3):
                       )
 
 
+def cur_date_now():
+    date_now = datetime.now()
+    return date_now
+
+
 def check_interval_word(dict):
 
     level_word, date_word = dict[2], dict[3]
     day_level = LEVEL_TIME[level_word]
 
-    date_now = datetime.now()
+    date_now = cur_date_now()
 
     interval_word = datetime.strptime(date_word, "%Y-%m-%d") + timedelta(days=day_level)
 
@@ -37,3 +42,5 @@ def check_interval_word(dict):
     if date_now_ymd > interval_word_ymd:
         return True
     return False
+
+

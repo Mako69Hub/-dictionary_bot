@@ -100,5 +100,15 @@ def update_word(user_id, word, translation):
         return None
 
 
-def bd_update_lvl():
-    pass
+def update_level(user_id, word, level, date):
+    try:
+        with sqlite3.connect('db.sqlite') as conn:
+            cursor = conn.cursor()
+            cursor.execute("UPDATE dict SET level_us = ?, date = ? WHERE user_id = ? AND word = ?", (level, date, user_id, word))
+            logging.info(f"DATABASE: UPDATE words SET level_us = {level} WHERE user_id = {user_id} AND word = {word}")
+            conn.commit()
+    except Exception as e:
+        logging.error(e)
+        return None
+
+
