@@ -1,17 +1,14 @@
 import random
-
 from telebot import TeleBot
 from telebot.types import Message
 from telebot import types
-
 from database import create_database, insert_new_word, update_word, select_word, update_level
 from process import str_in_list_dict, remove_double_word, list_in_str_dict
 from config import TOKEN, CUR_USER_DICT, STEP_USER, DONE_USER_DICT
 from time import sleep
 from random import sample
 import datetime
-from scheduler import scheduler, check_interval_word, cur_date_now
-# from handlers import commands, speechkit
+from scheduler import create_job, check_interval_word, cur_date_now
 
 bot = TeleBot(TOKEN)
 
@@ -81,7 +78,7 @@ def double_check(message, dict_user):
     else:
         bot.send_message(message.chat.id, 'Введите слова ещё раз')
         bot.register_next_step_handler(message, new_word_handler)
-
+    create_job(bot, message.chat.id)
 
 @bot.message_handler(commands=['update'])
 def handle_update_command(message):
