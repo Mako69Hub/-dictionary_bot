@@ -43,6 +43,11 @@ def new_word_info_handler(message: Message):
 @bot.message_handler(func=lambda message: '=' in message.text)
 def new_word_handler(message: Message):
     cur_list_dict, report_int = str_in_list_dict(message.text)
+
+    if not cur_list_dict:
+        bot.send_message(message.chat.id, report_int)
+        return
+
     list_dict, report_check = remove_double_word(message.chat.id, cur_list_dict)
     report = report_int + report_check  # Репорт наличие цифр и наличия слов в БД
 

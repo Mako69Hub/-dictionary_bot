@@ -10,6 +10,10 @@ def str_in_list_dict(text):
 
     for element in dict:
         word, translation = map(str.strip, element.split('='))
+
+        if word == '' or translation == '':
+            return False, 'Пустое значение, введите ещё раз'
+
         if word.isalnum():
             list_words.append([word, translation])
         else:
