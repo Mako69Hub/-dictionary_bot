@@ -21,3 +21,5 @@ LEVEL_TIME = {
     8: 365,
     9: 1095
 }
+
+DONE_USER_DICT = {}

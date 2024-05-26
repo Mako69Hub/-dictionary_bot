@@ -4,7 +4,7 @@ from telebot import types
 
 from database import create_database, insert_new_word, update_word, select_word, update_level
 from process import str_in_list_dict, remove_double_word, list_in_str_dict
-from config import TOKEN, CUR_USER_DICT, STEP_USER
+from config import TOKEN, CUR_USER_DICT, STEP_USER, DONE_USER_DICT
 from time import sleep
 from random import sample
 import datetime
@@ -111,6 +111,16 @@ def list_handler(message: Message):
     bot.send_message(message.chat.id, list_user)
 
 
+def saving_progress(user_id):
+    dict_write = DONE_USER_DICT[user_id]
+
+    for word_list in dict_write:
+        word, level_word, date_now = word_list
+        update_level(user_id, word, level_word, date_now)
+    bot.send_message(user_id, 'Сохранил!')
+    return
+
+
 @bot.message_handler(commands=['play'])
 def play_handler(message: Message):
     dict_user = select_word(message.chat.id)
@@ -133,6 +143,7 @@ def play_handler(message: Message):
 
 
 def repeat_list(message: Message):
+    DONE_USER_DICT[message.chat.id] = []
     if message.text == '/repeat':
         STEP_USER[message.chat.id] = len(CUR_USER_DICT[message.chat.id])
         repeat(message)
@@ -160,8 +171,10 @@ def repeat(message: Message):
     len_words = len(list_words)
 
     if len_words == 0:
-        bot.send_message(message.chat.id, 'Молодец, повторил все слова')
+        bot.send_message(message.chat.id, 'Молодец, повторил все слова. Обновляю таблицу...')
+        saving_progress(message.chat.id)
         return
+
 
     bot.send_message(message.chat.id, f'Напишите перевод слова {list_words[0][1]}')
     bot.register_next_step_handler(message, replay, list_words[0])
@@ -172,6 +185,7 @@ def replay(message: Message, list_word):
     answer_us = message.text
     if answer_us == '/exit':
         bot.send_message(message.chat.id, 'Жду нашей встречи вновь.')
+        saving_progress(message.chat.id)
         return
 
     if not answer_us.isalnum():
@@ -181,15 +195,17 @@ def replay(message: Message, list_word):
 
     if answer_us == word:
         bot.send_message(message.chat.id,
-                         'Верно.\nЗагружаю следующее слово...')
+                         'Верно.')
         level_word += 1 # Ещё нужно спрашивать чела, правильно или нет
 
         date_now = cur_date_now()
+        list_word_now = [word, level_word, date_now]
 
-        update_level(message.chat.id, word, level_word, date_now)
+        cur_word_repeat = DONE_USER_DICT[message.chat.id]
+        cur_word_repeat.append(list_word_now)
 
     else:
-        bot.send_message(message.chat.id, f'Правильное написание: {word} ')
+        bot.send_message(message.chat.id, f'Правильное написание: {word}')
 
     list_words = CUR_USER_DICT[message.chat.id]
 
