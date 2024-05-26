@@ -151,7 +151,7 @@ def repeat_list(message: Message):
         repeat(message)
         return
 
-    elif message.text == '/list_words':
+    elif message.text == '/list_words': #добавить кнопку, скрывающую это сообщение
         list_words = CUR_USER_DICT[message.chat.id].copy()
         random.shuffle(list_words)
 
@@ -188,7 +188,7 @@ def replay(message: Message, list_word):
     word, trans, level_word, date_word = list_word
     answer_us = message.text
     if answer_us == '/exit':
-        bot.send_message(message.chat.id, 'Жду нашей встречи вновь.')
+        bot.send_message(message.chat.id, 'Жду нашей встречи вновь.\n Обновляю таблицу...')
         saving_progress(message.chat.id)
         return
 
