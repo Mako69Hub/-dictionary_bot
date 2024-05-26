@@ -1,3 +1,5 @@
+import random
+
 from telebot import TeleBot
 from telebot.types import Message
 from telebot import types
@@ -150,7 +152,9 @@ def repeat_list(message: Message):
         return
 
     elif message.text == '/list_words':
-        list_words = CUR_USER_DICT[message.chat.id]
+        list_words = CUR_USER_DICT[message.chat.id].copy()
+        random.shuffle(list_words)
+
         text_words = list_in_str_dict(list_words)
         bot.send_message(message.chat.id, text_words)
         bot.register_next_step_handler(message, repeat_list)

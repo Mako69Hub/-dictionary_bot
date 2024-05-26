@@ -3,7 +3,6 @@ venv/
 *.log
 *.db
 *.sqlite
-main.py
 main1.py
 .idea/
 
