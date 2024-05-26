@@ -3,13 +3,12 @@ from telebot.types import Message
 from telebot import types
 
 from database import create_database, insert_new_word, update_word, select_word, bd_update_lvl
-from process import str_in_list_dict, remove_double_word, list_in_str_dict, interval_repeat
+from process import str_in_list_dict, remove_double_word, list_in_str_dict
 from config import TOKEN, CUR_USER_DICT, STEP_USER
 from time import sleep
 from random import sample
 import datetime
-
-# from scheduler import scheduler
+from scheduler import scheduler, check_interval_word
 # from handlers import commands, speechkit
 
 bot = TeleBot(TOKEN)
@@ -115,12 +114,15 @@ def list_handler(message: Message):
 @bot.message_handler(commands=['play'])
 def play_handler(message: Message):
     dict_user = select_word(message.chat.id)
-    # cur_dict_user = interval_repeat(dict_user)
-
+    cur_dict_user = []
 
     if type(dict_user) == type('str'):
         bot.send_message(message.chat.id, dict_user)
         return
+
+    for element in dict_user:
+        if check_interval_word(element):
+            cur_dict_user.append(element)
 
     count_word = min(10, len(dict_user))
     CUR_USER_DICT[message.chat.id] = sample(dict_user, count_word)
@@ -161,7 +163,7 @@ def repeat(message: Message):
         bot.send_message(message.chat.id, 'Молодец, повторил все слова')
         return
 
-    cur_word, cur_trans = list_words[0]
+    cur_word, cur_trans = list_words[0][0], list_words[0][1]
 
     bot.send_message(message.chat.id, f'Напишите перевод слова {cur_trans}')
     bot.register_next_step_handler(message, replay, cur_word)
