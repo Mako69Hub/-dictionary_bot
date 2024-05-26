@@ -1,15 +1,16 @@
+import random
+
 from telebot import TeleBot
 from telebot.types import Message
 from telebot import types
 
-from database import create_database, insert_new_word, update_word, select_word, bd_update_lvl
+from database import create_database, insert_new_word, update_word, select_word, update_level
 from process import str_in_list_dict, remove_double_word, list_in_str_dict
-from config import TOKEN, CUR_USER_DICT, STEP_USER
+from config import TOKEN, CUR_USER_DICT, STEP_USER, DONE_USER_DICT
 from time import sleep
 from random import sample
 import datetime
-
-# from scheduler import scheduler
+from scheduler import scheduler, check_interval_word, cur_date_now
 # from handlers import commands, speechkit
 
 bot = TeleBot(TOKEN)
@@ -42,6 +43,11 @@ def new_word_info_handler(message: Message):
 @bot.message_handler(func=lambda message: '=' in message.text)
 def new_word_handler(message: Message):
     cur_list_dict, report_int = str_in_list_dict(message.text)
+
+    if not cur_list_dict:
+        bot.send_message(message.chat.id, report_int)
+        return
+
     list_dict, report_check = remove_double_word(message.chat.id, cur_list_dict)
     report = report_int + report_check  # Репорт наличие цифр и наличия слов в БД
 
@@ -88,7 +94,7 @@ def handle_update_command(message):
             word, translation = map(str.strip, text.split('=', 1))
 
             if not word.isalnum():
-                bot.send_message(message.chat.id, 'Слово не должно содержать букв, а вот регистр не имеет значения')
+                bot.send_message(message.chat.id, 'Слово не должно содержать букв')
                 bot.register_next_step_handler(message, get_update_word)
                 return
 
@@ -103,17 +109,37 @@ def handle_update_command(message):
 @bot.message_handler(commands=['list'])
 def list_handler(message: Message):
     dict_user_all = select_word(message.chat.id)
+
+    if type(dict_user_all) == type('str'):
+        bot.send_message(message.chat.id, dict_user_all)
+        return
+
     list_user = list_in_str_dict(dict_user_all)
     bot.send_message(message.chat.id, list_user)
+
+
+def saving_progress(user_id):
+    dict_write = DONE_USER_DICT[user_id]
+
+    for word_list in dict_write:
+        word, level_word, date_now = word_list
+        update_level(user_id, word, level_word, date_now)
+    bot.send_message(user_id, 'Сохранил!')
+    return
 
 
 @bot.message_handler(commands=['play'])
 def play_handler(message: Message):
     dict_user = select_word(message.chat.id)
+    cur_dict_user = []
 
-    if type(dict_user) == 'str':
+    if type(dict_user) == type('str'):
         bot.send_message(message.chat.id, dict_user)
         return
+
+    for element in dict_user:
+        if check_interval_word(element):
+            cur_dict_user.append(element)
 
     count_word = min(10, len(dict_user))
     CUR_USER_DICT[message.chat.id] = sample(dict_user, count_word)
@@ -124,13 +150,16 @@ def play_handler(message: Message):
 
 
 def repeat_list(message: Message):
+    DONE_USER_DICT[message.chat.id] = []
     if message.text == '/repeat':
         STEP_USER[message.chat.id] = len(CUR_USER_DICT[message.chat.id])
         repeat(message)
         return
 
-    elif message.text == '/list_words':
-        list_words = CUR_USER_DICT[message.chat.id]
+    elif message.text == '/list_words': #добавить кнопку, скрывающую это сообщение
+        list_words = CUR_USER_DICT[message.chat.id].copy()
+        random.shuffle(list_words)
+
         text_words = list_in_str_dict(list_words)
         bot.send_message(message.chat.id, text_words)
         bot.register_next_step_handler(message, repeat_list)
@@ -151,33 +180,41 @@ def repeat(message: Message):
     len_words = len(list_words)
 
     if len_words == 0:
-        bot.send_message(message.chat.id, 'Молодец, повторил все слова')
+        bot.send_message(message.chat.id, 'Молодец, повторил все слова. Обновляю таблицу...')
+        saving_progress(message.chat.id)
         return
 
-    cur_word, cur_trans = list_words[0]
 
-    bot.send_message(message.chat.id, f'Напишите перевод слова {cur_trans}')
-    bot.register_next_step_handler(message, replay, cur_word)
+    bot.send_message(message.chat.id, f'Напишите перевод слова {list_words[0][1]}')
+    bot.register_next_step_handler(message, replay, list_words[0])
 
 
-def replay(message: Message, word_user):
+def replay(message: Message, list_word):
+    word, trans, level_word, date_word = list_word
     answer_us = message.text
     if answer_us == '/exit':
-        bot.send_message(message.chat.id, 'Жду нашей встречи вновь.')
+        bot.send_message(message.chat.id, 'Жду нашей встречи вновь.\n Обновляю таблицу...')
+        saving_progress(message.chat.id)
         return
 
     if not answer_us.isalnum():
         bot.send_message(message.chat.id, 'Введите ответ без цифр')
-        bot.register_next_step_handler(message, replay, word_user)
+        bot.register_next_step_handler(message, list_word)
         return
 
-    if answer_us.lower() == word_user:
+    if answer_us == word:
         bot.send_message(message.chat.id,
-                         'Верно')  # Увеличить уровень, дописать. Ещё нужно спрашивать чела, праввильно или нет
-        bd_update_lvl()
+                         'Верно.')
+        level_word += 1 # Ещё нужно спрашивать чела, правильно или нет
+
+        date_now = cur_date_now()
+        list_word_now = [word, level_word, date_now]
+
+        cur_word_repeat = DONE_USER_DICT[message.chat.id]
+        cur_word_repeat.append(list_word_now)
 
     else:
-        bot.send_message(message.chat.id, f'Правильное написание: {word_user} ')
+        bot.send_message(message.chat.id, f'Правильное написание: {word}')
 
     list_words = CUR_USER_DICT[message.chat.id]
 

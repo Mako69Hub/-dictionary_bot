@@ -1,5 +1,7 @@
 from database import check_repeat_word, select_word
-
+from datetime import datetime, timedelta
+from config import LEVEL_TIME
+from scheduler import check_interval_word
 
 def str_in_list_dict(text):
     dict = text.split('\n')
@@ -8,6 +10,10 @@ def str_in_list_dict(text):
 
     for element in dict:
         word, translation = map(str.strip, element.split('='))
+
+        if word == '' or translation == '':
+            return False, 'Пустое значение, введите ещё раз'
+
         if word.isalnum():
             list_words.append([word, translation])
         else:
@@ -40,5 +46,12 @@ def remove_double_word(user_id, dict_user):
 
 # def passivation_dict(user_id, date, dict_user):
 #     for element in dict_user:
-def random_words_dect(user_id, quantity = 10):
-        pass
+
+
+
+
+
+
+
+
+
